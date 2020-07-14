@@ -13,5 +13,10 @@
  */
 
 return [
-    // ...
+    'db' => [
+        'driver' => 'Mysqli',
+        'database' => 'laminas-extjs-test',
+        'username' => 'root',
+        'password' => 'root',
+    ],
 ];

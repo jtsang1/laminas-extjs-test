@@ -1,0 +1,26 @@
+<?php
+$title = 'My todos';
+$this->headTitle($title);
+?>
+<h1><?= $this->escapeHtml($title) ?></h1>
+<p>
+    <a href="<?= $this->url('todo', ['action' => 'add']) ?>">Add new todo</a>
+</p>
+
+<table class="table">
+    <tr>
+        <th>Title</th>
+        <th>Title2</th>
+        <th>&nbsp;</th>
+    </tr>
+    <?php foreach ($todos as $todo) : ?>
+        <tr>
+            <td><?= $this->escapeHtml($todo->title) ?></td>
+            <td><?= $this->escapeHtml($todo->title) ?></td>
+            <td>
+                <a href="<?= $this->url('todo', ['action' => 'edit', 'id' => $todo->id]) ?>">Edit</a>
+                <a href="<?= $this->url('todo', ['action' => 'delete', 'id' => $todo->id]) ?>">Delete</a>
+            </td>
+        </tr>
+    <?php endforeach; ?>
+</table>

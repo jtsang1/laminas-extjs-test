@@ -6,16 +6,16 @@ use Laminas\Router\Http\Segment;
 use Laminas\ServiceManager\Factory\InvokableFactory;
 
 return [
-    'controllers' => [
+    /*'controllers' => [
         'factories' => [
             Controller\TodoController::class => InvokableFactory::class,
         ],
-    ],
+    ],*/
 
     // The following section is new and should be added to your file:
     'router' => [
         'routes' => [
-            'album' => [
+            'todo' => [
                 'type'    => Segment::class,
                 'options' => [
                     'route' => '/todo[/:action[/:id]]',
@@ -33,8 +33,13 @@ return [
     ],
 
     'view_manager' => [
+
+        'strategies' => [
+            'ViewJsonStrategy',
+        ],
+
         'template_path_stack' => [
-            'album' => __DIR__ . '/../view',
+            'todo' => __DIR__ . '/../view',
         ],
     ],
 ];
