@@ -8,6 +8,7 @@ use Laminas\Db\ResultSet\ResultSetInterface;
 use Laminas\Mvc\Controller\AbstractActionController;
 use Laminas\View\Model\JsonModel;
 use Laminas\View\Model\ViewModel;
+use Todos\Model\Todo;
 use Todos\Model\TodoTable;
 
 class TodoController extends AbstractActionController
@@ -23,6 +24,11 @@ class TodoController extends AbstractActionController
 
     public function indexAction()
     {
+
+        $request = $this->getRequest();
+
+        if($request->isGet()) {
+
 //        return new ViewModel([
 //            'todos' => $this->table->fetchAll(),
 //        ]);
@@ -36,15 +42,29 @@ class TodoController extends AbstractActionController
 //            ]
 //        ]);
 
-        /* @var $r AbstractResultSet */
-        $r = $this->table->fetchAll();
+            /* @var $r AbstractResultSet */
+            $r = $this->table->fetchAll();
 
-        $todos = [];
-        foreach ($r as $row){
-            $todos[] = $row;
+            $todos = [];
+            foreach ($r as $row) {
+                $todos[] = $row;
+            }
+
+            return new JsonModel($todos);
         }
 
-        return new JsonModel($todos);
+        elseif ($request->isPost()){
+
+            $params = json_decode($request->getContent(), true);
+            //var_dump(json_encode($params));die();
+            $todo = new Todo();
+            $todo->exchangeArray($params);
+            $todo_id = $this->table->saveTodo($todo);
+
+            $todo = $this->table->getTodo($todo_id);
+
+            return new JsonModel((array)$todo);
+        }
     }
 
     public function addAction()

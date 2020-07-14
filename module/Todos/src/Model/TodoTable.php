@@ -38,15 +38,17 @@ class TodoTable
     public function saveTodo(Todo $todo)
     {
         $data = [
-            'name' => $todo->name,
+            'title' => $todo->title,
             'priority_id'  => $todo->priority_id,
         ];
 
         $id = (int) $todo->id;
 
         if ($id === 0) {
+
+            $data['created_at'] = date('Y-m-d H:i:s');
             $this->tableGateway->insert($data);
-            return;
+            return $this->tableGateway->getLastInsertValue();
         }
 
         try {
@@ -59,6 +61,8 @@ class TodoTable
         }
 
         $this->tableGateway->update($data, ['id' => $id]);
+
+        return $id;
     }
 
     public function deleteTodo($id)
