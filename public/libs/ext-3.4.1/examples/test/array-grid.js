@@ -30,6 +30,8 @@ Ext.onReady(function(){
     // should ensure that stable state ids are set for stateful components in real apps.    
     Ext.state.Manager.setProvider(new Ext.state.CookieProvider());
 
+    var apiUrl = "http://localhost:8000";
+
     initForm();
 
     function initForm(){
@@ -103,9 +105,10 @@ Ext.onReady(function(){
 
                     var btn = this;
                     btn.setDisabled(true);
+                    gridPanelMask.show();
 
                     Ext.Ajax.request({
-                        url: 'http://localhost:8000/todo',
+                        url: apiUrl + '/todo',
                         method: 'POST',
                         success: function(response){
                             var data = JSON.parse(response.responseText);
@@ -115,6 +118,7 @@ Ext.onReady(function(){
                             store.add(newRecord);
 
                             btn.setDisabled(false);
+                            gridPanelMask.hide();
                         },
                         headers: {},
                         jsonData : vals
@@ -145,6 +149,8 @@ Ext.onReady(function(){
     });
 
     initGrid();
+    var gridPanelMask = new Ext.LoadMask('grid-panel', {msg:"Updating..."});
+
     loadTodos();
 
     function initGrid(){
@@ -165,6 +171,7 @@ Ext.onReady(function(){
 
         // create the Grid
         var grid = new Ext.grid.GridPanel({
+            id: 'grid-panel',
             store: store,
             columns: [
                 {
@@ -202,7 +209,28 @@ Ext.onReady(function(){
                         tooltip: 'Delete',
                         handler: function(grid, rowIndex, colIndex) {
                             var rec = store.getAt(rowIndex);
-                            alert("Delete todo: " + rec.get('title'));
+
+                            console.log(this);
+
+                            gridPanelMask.show();
+
+                            //grid.setDisabled(true)
+
+                            Ext.Ajax.request({
+                                url: apiUrl + '/todo/delete/' + rec.get('id'),
+                                method: 'DELETE',
+                                success: function(response){
+                                    var data = JSON.parse(response.responseText);
+                                    console.log(data);
+
+                                    var newRecord = new todoRecord(data);
+                                    store.removeAt(rowIndex);
+
+                                    gridPanelMask.hide();
+                                    //grid.setDisabled(false)
+                                },
+                                headers: {}
+                            });
                         }
                     }, {
                         getClass: function(v, meta, rec) {          // Or return a class from a function
@@ -243,7 +271,7 @@ Ext.onReady(function(){
         store.loadData(myData);*/
 
         Ext.Ajax.request({
-            url: 'http://localhost:8000/todo',
+            url: apiUrl + '/todo',
             success: function(response){
                 var data = JSON.parse(response.responseText);
                 console.log(data);
