@@ -20,10 +20,10 @@ return [
             'home' => [
                 'type'    => Literal::class,
                 'options' => [
-                    'route'    => '/',
+                    'route'    => '/home',
                     'defaults' => [
                         'controller' => Controller\IndexController::class,
-                        'action'     => 'index',
+                        'action'     => 'home',
                     ],
                 ],
             ],
