@@ -33,10 +33,10 @@ Ext.onReady(function(){
     // create the data store
     var store = new Ext.data.ArrayStore({
         fields: [
-            {name: 'id'},
-            {name: 'title',},
-            {name: 'priority_id',   type: 'float'},
-            {name: 'created_at', type: 'date', dateFormat: 'n/j h:ia'}
+            {name: 'id', mapping: 'id'},
+            {name: 'title', mapping: 'title'},
+            {name: 'priority_id', mapping: 'priority_id',  type: 'float'},
+            {name: 'created_at', mapping: 'created_at', type: 'date', dateFormat: 'Y-m-d H:i:s'}
         ]
     });
 
@@ -129,15 +129,29 @@ Ext.onReady(function(){
 
     function loadTodos(){
         // sample static data for the store
-        var myData = [
+        /*var myData = [
             [1, '123', 1, '9/1 12:00am'],
             [2, '234', 2, '9/1 12:00am'],
             [3, '345', 3, '9/1 12:00am'],
         ];
 
         // manually load local data
-        store.loadData(myData);
+        store.loadData(myData);*/
+
+        Ext.Ajax.request({
+            url: 'http://localhost:8000/todo',
+            success: function(response){
+                var data = JSON.parse(response.responseText);
+                console.log(data);
+
+                store.loadData(data);
+            },
+            headers: {},
+            params: {}
+        });
     }
 
+    function getTodos(){
 
+    }
 });
