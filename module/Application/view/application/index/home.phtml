@@ -3,11 +3,33 @@
  * @var Laminas\View\Renderer\PhpRenderer $this
  */
 ?>
+
+<?php
+
+$this->headLink()
+    ->appendStylesheet($this->basePath("libs/ext-3.4.1/resources/css/ext-all.css"))
+    ->appendStylesheet($this->basePath("libs/ext-3.4.1/examples/shared/examples.css"))
+    ->appendStylesheet($this->basePath("libs/ext-3.4.1/examples/test/grid-examples.css"))
+    ->appendStylesheet($this->basePath("libs/ext-3.4.1/examples/test/test.css"));
+
+?>
 <div>
     <h1>Welcome to the Test Application</h1>
     <p>
         Testing Laminas and ExtJS
     </p>
 
+    <h1>Stateful Array Grid Example</h1>
+    <p>This example shows how to create a grid from Array data.</p>
+    <p>The grid is stateful so you can move or hide columns, reload the page, and come
+        back to the grid in the same state you left it in.</p>
+
+    <div id="grid-example"></div>
 
 </div>
+
+<?php $this->headScript()
+    ->appendFile($this->basePath("libs/ext-3.4.1/adapter/ext/ext-base.js"))
+    ->appendFile($this->basePath("libs/ext-3.4.1/ext-all.js"))
+    ->appendFile($this->basePath("libs/ext-3.4.1/examples/test/array-grid.js"))
+?>

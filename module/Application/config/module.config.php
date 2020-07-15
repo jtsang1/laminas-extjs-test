@@ -20,7 +20,7 @@ return [
             'home' => [
                 'type'    => Literal::class,
                 'options' => [
-                    'route'    => '/home',
+                    'route'    => '/',
                     'defaults' => [
                         'controller' => Controller\IndexController::class,
                         'action'     => 'home',
