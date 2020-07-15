@@ -30,14 +30,118 @@ Ext.onReady(function(){
     // should ensure that stable state ids are set for stateful components in real apps.    
     Ext.state.Manager.setProvider(new Ext.state.CookieProvider());
 
+    initForm();
+
+    function initForm(){
+        // turn on validation errors beside the field globally
+        Ext.form.Field.prototype.msgTarget = 'side';
+
+        var bd = Ext.getBody();
+
+        Ext.namespace('Ext.exampledata');
+        Ext.exampledata.priorities = [
+            [1, 'Low'],
+            [2, 'Medium'],
+            [3, 'High'],
+        ];
+        var priorityStore = new Ext.data.ArrayStore({
+            fields: ['id', 'name'],
+            data : Ext.exampledata.priorities // from states.js
+        });
+
+        /*
+         * ================  Simple form  =======================
+         */
+        var simple = new Ext.FormPanel({
+            labelWidth: 75, // label settings here cascade unless overridden
+            frame:true,
+            title: 'Add a Todo',
+            bodyStyle:'padding:5px 5px 0',
+            width: 300,
+            defaults: {width: 200},
+            defaultType: 'textfield',
+
+            items: [{
+                fieldLabel: 'Title',
+                name: 'title',
+                allowBlank:false,
+                value: 'Another todo'
+            },
+            // new Ext.form.TimeField({
+            //     fieldLabel: 'Time',
+            //     name: 'time',
+            //     minValue: '8:00am',
+            //     maxValue: '6:00pm'
+            // }),
+            new Ext.form.ComboBox({
+                fieldLabel: 'Priority',
+                store: priorityStore,
+                displayField:'name',
+                valueField:'id',
+                value: 2,
+                typeAhead: true,
+                mode: 'local',
+                forceSelection: true,
+                triggerAction: 'all',
+                emptyText:'Select a priority',
+                selectOnFocus:true,
+                allowBlank:false,
+                name: 'priority_id'
+            })],
+
+            buttons: [{
+                text: 'Create',
+                handler: function(b){
+                    var f = simple.getForm();
+                    var vals = f.getFieldValues();
+                    console.log(vals);
+
+                    if(!f.isValid()){
+                        f.markInvalid();
+                        return;
+                    }
+
+                    var btn = this;
+                    btn.setDisabled(true);
+
+                    Ext.Ajax.request({
+                        url: 'http://localhost:8000/todo',
+                        method: 'POST',
+                        success: function(response){
+                            var data = JSON.parse(response.responseText);
+                            console.log(data);
+
+                            var newRecord = new todoRecord(data);
+                            store.add(newRecord);
+
+                            btn.setDisabled(false);
+                        },
+                        headers: {},
+                        jsonData : vals
+                    });
+                }
+            },{
+                text: 'Reset',
+                handler: function(b){
+                    var f = simple.getForm();
+                    f.reset();
+                }
+            }]
+        });
+
+        simple.render('form-example');
+    }
+
+    var todoRecord = Ext.data.Record.create([ // creates a subclass of Ext.data.Record
+        {name: 'id', mapping: 'id'},
+        {name: 'title', mapping: 'title'},
+        {name: 'priority_id', mapping: 'priority_id',  type: 'float'},
+        {name: 'created_at', mapping: 'created_at', type: 'date', dateFormat: 'Y-m-d H:i:s'}
+    ]);
+
     // create the data store
     var store = new Ext.data.ArrayStore({
-        fields: [
-            {name: 'id', mapping: 'id'},
-            {name: 'title', mapping: 'title'},
-            {name: 'priority_id', mapping: 'priority_id',  type: 'float'},
-            {name: 'created_at', mapping: 'created_at', type: 'date', dateFormat: 'Y-m-d H:i:s'}
-        ]
+        fields: todoRecord
     });
 
     initGrid();
@@ -87,7 +191,7 @@ Ext.onReady(function(){
                     header   : 'Created At',
                     width    : 85,
                     sortable : true,
-                    renderer : Ext.util.Format.dateRenderer('m/d/Y'),
+                    renderer : Ext.util.Format.dateRenderer('Y-m-d h:iA'),
                     dataIndex: 'created_at'
                 },
                 {
