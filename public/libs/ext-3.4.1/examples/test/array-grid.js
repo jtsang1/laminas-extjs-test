@@ -32,28 +32,30 @@ Ext.onReady(function(){
 
     var apiUrl = "http://localhost:8000";
 
+    Ext.namespace('Ext.exampledata');
+    Ext.exampledata.priorities = [
+        {id: 1, name: 'Low'},
+        {id: 2, name: 'Medium'},
+        {id: 3, name: 'High'},
+    ];
+
+    var priorityRecord = Ext.data.Record.create([ // creates a subclass of Ext.data.Record
+        {name: 'id', mapping: 'id'},
+        {name: 'name', mapping: 'name'},
+    ]);
+
+    var priorityStore = new Ext.data.ArrayStore({
+        fields: priorityRecord,
+        data: Ext.exampledata.priorities,
+        id: 'id'
+    });
+
     initForm();
 
     function initForm(){
         // turn on validation errors beside the field globally
         Ext.form.Field.prototype.msgTarget = 'side';
 
-        var bd = Ext.getBody();
-
-        Ext.namespace('Ext.exampledata');
-        Ext.exampledata.priorities = [
-            [1, 'Low'],
-            [2, 'Medium'],
-            [3, 'High'],
-        ];
-        var priorityStore = new Ext.data.ArrayStore({
-            fields: ['id', 'name'],
-            data : Ext.exampledata.priorities // from states.js
-        });
-
-        /*
-         * ================  Simple form  =======================
-         */
         var simple = new Ext.FormPanel({
             labelWidth: 75, // label settings here cascade unless overridden
             frame:true,
@@ -88,7 +90,8 @@ Ext.onReady(function(){
                 emptyText:'Select a priority',
                 selectOnFocus:true,
                 allowBlank:false,
-                name: 'priority_id'
+                name: 'priority_id',
+                editable: false,
             })],
 
             buttons: [{
@@ -96,7 +99,7 @@ Ext.onReady(function(){
                 handler: function(b){
                     var f = simple.getForm();
                     var vals = f.getFieldValues();
-                    console.log(vals);
+                    //console.log(vals);
 
                     if(!f.isValid()){
                         f.markInvalid();
@@ -114,8 +117,10 @@ Ext.onReady(function(){
                             var data = JSON.parse(response.responseText);
                             console.log(data);
 
-                            var newRecord = new todoRecord(data);
+                            var newRecord = new todoRecord(data, data.id);
                             store.add(newRecord);
+
+                            //console.log(store);
 
                             btn.setDisabled(false);
                             gridPanelMask.hide();
@@ -145,7 +150,8 @@ Ext.onReady(function(){
 
     // create the data store
     var store = new Ext.data.ArrayStore({
-        fields: todoRecord
+        fields: todoRecord,
+        id: 'id'
     });
 
     initGrid();
@@ -159,12 +165,16 @@ Ext.onReady(function(){
          * @param {Number} val
          */
         function priority(val) {
+
+            var p = priorityStore.getById(val);
+            var pName = p ? p.get('name') : '';
+
             if (val === 1) {
-                return '<span style="color:green;">' + val + '</span>';
+                return '<span style="color:green;">' + pName + '</span>';
             } else if (val === 2) {
-                return '<span style="color:orange;">' + val + '</span>';
+                return '<span style="color:orange;">' + pName + '</span>';
             } else if (val === 3) {
-                return '<span style="color:red;">' + val + '</span>';
+                return '<span style="color:red;">' + pName + '</span>';
             }
             return val;
         }
@@ -196,7 +206,7 @@ Ext.onReady(function(){
                 },
                 {
                     header   : 'Created At',
-                    width    : 85,
+                    width    : 120,
                     sortable : true,
                     renderer : Ext.util.Format.dateRenderer('Y-m-d h:iA'),
                     dataIndex: 'created_at'
@@ -213,7 +223,6 @@ Ext.onReady(function(){
                             console.log(this);
 
                             gridPanelMask.show();
-
                             //grid.setDisabled(true)
 
                             Ext.Ajax.request({
@@ -234,12 +243,15 @@ Ext.onReady(function(){
                         }
                     }, {
                         getClass: function(v, meta, rec) {          // Or return a class from a function
-                            this.items[1].tooltip = 'Save';
-                            return 'buy-col';
+                            this.items[1].tooltip = 'Edit';
+                            return 'edit-col';
                         },
                         handler: function(grid, rowIndex, colIndex) {
                             var rec = store.getAt(rowIndex);
-                            alert("Save todo: " + rec.get('title'));
+
+                            var editTodoForm = editTodoFormPanel.getForm();
+                            editTodoForm.setValues(rec.data);
+                            editTodoWindow.show();
                         }
                     }]
                 }
@@ -247,7 +259,7 @@ Ext.onReady(function(){
             stripeRows: true,
             autoExpandColumn: 'title',
             height: 350,
-            width: 500,
+            width: 600,
             title: 'Todo List',
             // config options for stateful behavior
             stateful: true,
@@ -256,8 +268,102 @@ Ext.onReady(function(){
 
         // render the grid to the specified div in the page
         grid.render('grid-example');
-    }
 
+        // Edit form window
+        var editTodoFormPanel = new Ext.form.FormPanel({
+            labelWidth: 75, // label settings here cascade unless overridden
+            frame:true,
+            //title: 'Edit todo',
+            bodyStyle:'padding:5px 5px 0',
+            width: 300,
+            defaults: {width: 200},
+            defaultType: 'textfield',
+
+            items: [{
+                fieldLabel: 'Title',
+                name: 'title',
+                allowBlank:false,
+                value: ''
+            }, new Ext.form.ComboBox({
+                fieldLabel: 'Priority',
+                store: priorityStore,
+                displayField:'name',
+                valueField:'id',
+                value: 2,
+                typeAhead: true,
+                mode: 'local',
+                forceSelection: true,
+                triggerAction: 'all',
+                emptyText:'Select a priority',
+                selectOnFocus:true,
+                allowBlank:false,
+                name: 'priority_id',
+                editable: false,
+            }), new Ext.form.Hidden({
+                name: 'id',
+                value: null
+            })],
+        });
+
+        var editTodoWindow = new Ext.Window({
+            title: 'Edit Todo',
+            width: 400,
+            height:200,
+            minWidth: 300,
+            minHeight: 200,
+            layout: 'fit',
+            plain:true,
+            bodyStyle:'padding:5px;',
+            buttonAlign:'center',
+            items: editTodoFormPanel,
+            closeAction: 'hide',
+
+            buttons: [{
+                text: 'Save',
+                handler: function () {
+
+                    var f = editTodoFormPanel.getForm();
+                    var vals = f.getFieldValues();
+
+                    if(!f.isValid()){
+                        f.markInvalid();
+                        return;
+                    }
+
+                    var btn = this;
+                    btn.setDisabled(true);
+
+                    gridPanelMask.show();
+
+                    Ext.Ajax.request({
+                        url: apiUrl + '/todo/edit/' + vals.id,
+                        method: 'PUT',
+                        success: function(response){
+                            var data = JSON.parse(response.responseText);
+                            console.log(data);
+
+                            var updatedRecord = store.getById(vals.id);
+                            //console.log(updatedRecord);
+
+                            updatedRecord.data = data;
+                            updatedRecord.commit();
+
+                            btn.setDisabled(false);
+                            editTodoWindow.hide();
+                            gridPanelMask.hide();
+                        },
+                        headers: {},
+                        jsonData : vals
+                    });
+                }
+            },{
+                text: 'Cancel',
+                handler: function () {
+                    editTodoWindow.hide();
+                }
+            }]
+        });
+    }
 
     function loadTodos(){
         // sample static data for the store
@@ -281,9 +387,5 @@ Ext.onReady(function(){
             headers: {},
             params: {}
         });
-    }
-
-    function getTodos(){
-
     }
 });

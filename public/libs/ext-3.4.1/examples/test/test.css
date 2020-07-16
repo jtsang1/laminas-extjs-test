@@ -4,15 +4,8 @@
 }
 
 /* style for the \"buy\" ActionColumn icon */
-.x-action-col-cell img.buy-col {
+.x-action-col-cell img.edit-col {
     height: 16px;
     width: 16px;
-    background-image: url(/libs/ext-3.4.1/examples/shared/icons/fam/accept.png);
-}
-
-/* style for the \"alert\" ActionColumn icon */
-.x-action-col-cell img.alert-col {
-    height: 16px;
-    width: 16px;
-    background-image: url(/libs/ext-3.4.1/examples/shared/icons/fam/error.png);
+    background-image: url(/libs/ext-3.4.1/examples/shared/icons/fam/application_go.png);
 }
