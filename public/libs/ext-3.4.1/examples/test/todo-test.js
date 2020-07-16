@@ -1,34 +1,9 @@
 /*
-This file is part of Ext JS 3.4
-
-Copyright (c) 2011-2013 Sencha Inc
-
-Contact:  http://www.sencha.com/contact
-
-GNU General Public License Usage
-This file may be used under the terms of the GNU General Public License version 3.0 as
-published by the Free Software Foundation and appearing in the file LICENSE included in the
-packaging of this file.
-
-Please review the following information to ensure the GNU General Public License version 3.0
-requirements will be met: http://www.gnu.org/copyleft/gpl.html.
-
-If you are unsure which license is appropriate for your use, please contact the sales department
-at http://www.sencha.com/contact.
-
-Build date: 2013-04-03 15:07:25
-
 Modified by: Jeremy
 Modified on: 2020-07-14
 */
 Ext.onReady(function(){
     Ext.QuickTips.init();
-
-    // NOTE: This is an example showing simple state management. During development,
-    // it is generally best to disable state management as dynamically-generated ids
-    // can change across page loads, leading to unpredictable results.  The developer
-    // should ensure that stable state ids are set for stateful components in real apps.    
-    Ext.state.Manager.setProvider(new Ext.state.CookieProvider());
 
     var apiUrl = "http://localhost:8000";
 
@@ -269,7 +244,7 @@ Ext.onReady(function(){
         // render the grid to the specified div in the page
         grid.render('grid-example');
 
-        // Edit form window
+        // Init edit form window
         var editTodoFormPanel = new Ext.form.FormPanel({
             labelWidth: 75, // label settings here cascade unless overridden
             frame:true,
